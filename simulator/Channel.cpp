@@ -18,6 +18,8 @@ public:
 
     long long int oldNeutrons = 0;
 
+    int waterDensity = 1000;
+
     float power;
 
     Channel(long long int maxN = 100000000000, int idleN = 1000){
@@ -26,7 +28,7 @@ public:
     }
 
     void update(float delta){
-        float factor = 2 * (1 - (controlRodPosition/100));
+        float factor = 4.81 * ( 0.2 + (100 - controlRodPosition) * 0.8 / 100 ) * waterDensity / 1000;
 
         neutrons = factor * (idleNeutrons + oldNeutrons);
 

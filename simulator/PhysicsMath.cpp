@@ -4,7 +4,7 @@
 class PhysicsMath
 {
 private:
-    /* data */
+
 public:
     static double waterDensity(double temperature);
     static double calculateBoilingPoint(double pressurePa);
@@ -24,8 +24,8 @@ double PhysicsMath::waterDensity(double temperature) {
 double calculateBoilingPoint(double pressurePa) {
     const double H_vap = 40650.0;   // Enthalpy of vaporization in J/mol
     const double R = 8.314;         // Gas constant in J/(mol·K)
-    const double T1 = 373.15;       // Boiling point at 1 atm in Kelvin
-    const double P1 = 101325.0;     // Standard pressure (1 atm) in Pascals
+    const double T1 = 373.15;       // Boiling point at 1 atm °Kelvin
+    const double P1 = 101325.0;     // Standard pressure (1 atm) Pascals
 
     double lnP = std::log(pressurePa / P1);
     double invT2 = (1.0 / T1) - (R * lnP / H_vap);

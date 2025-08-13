@@ -20,7 +20,7 @@ int main(int argc, char const *argv[])
     while (true)
     {
         if(unit->update() == 0){
-            std::cout << unit->reactor->reactor_power << "\n";
+            std::cout << "Temperature: " << unit->reactor->waterTemperature << "°C | ReactorPower: " << unit->reactor->reactor_power << "% | AvarageControRod: " << unit->reactor->avarage_controlRodPosition << "% | ReactorPeriod: " <<unit->reactor->reactorPeriod  << "s\n";
         }
     }
     
