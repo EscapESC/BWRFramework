@@ -126,6 +126,11 @@ public:
             waterAmount -= ammountBoiled;
             steamAmount += ammountBoiled;
 
+            if(waterAmount < 0){
+                steamAmount += waterAmount;
+                waterAmount = 0;
+            }
+
             waterTemperature -= surplus;
 
             double waterDensity = PhysicsMath::waterDensity(waterTemperature);
