@@ -25,16 +25,12 @@ public:
 
     float waterTemperature = 20; //°C
 
-    float avarage_controlRodPosition = 0;
+    float avarage_controlRodPosition = 0;//output
 
-    //Chemistry stuff
-    float iodine = 0;
-    float xenon = 0;
+    double reactorPeriod;//output
 
-    double reactorPeriod;
-
-    float avarage_iodine;
-    float avarage_xenon;
+    float avarage_iodine = 0;//output
+    float avarage_xenon = 0;//output
 
     long long int total_neutrons = 0;
     int numberOfChannels = 0;
@@ -44,7 +40,7 @@ public:
 
     long long int oldNeutrons;
 
-    double reactor_power = 0;
+    double reactor_power = 0;//output
 
     Reactor(bool circle = true, long long int maxN = 100000000000, int idleN = 1000, int water = 60000){
         //POPULATE THE REACTOR WITH CHANNELS
@@ -82,6 +78,9 @@ public:
         avarage_controlRodPosition = 0;
         total_neutrons = 0;
 
+        avarage_iodine = 0;
+        avarage_xenon = 0;
+
         //UPDATE CHANNELS
         for (int x = 0; x < SIZE; x++) {
             for (int y = 0; y < SIZE; y++) {
@@ -91,6 +90,9 @@ public:
                         total_neutrons += channels[x][y][z]->neutrons;
                         avarage_controlRodPosition += channels[x][y][z]->controlRodPosition;
                         redistributeNeutrons(channels[x][y][z], x,y,z,channels,changeMetrix);
+
+                        avarage_iodine += channels[x][y][z]->iodine;
+                        avarage_xenon += channels[x][y][z]->xenon;
                     }
                 }
             }
@@ -106,15 +108,18 @@ public:
         }
 
         //WATER BOILING
-        waterTemperature += ((float)total_neutrons / (float)maxNeutrons) * 3200000000.0f * delta / (4200.0f * waterAmmount);
+        waterTemperature += ((long double)total_neutrons / (long double)maxNeutrons) * 3200000000.0f * delta / (4200.0f * waterAmmount);
+
+        avarage_iodine /= numberOfChannels;
+        avarage_xenon /= numberOfChannels;
 
         avarage_controlRodPosition = avarage_controlRodPosition / numberOfChannels;
         if (oldNeutrons > 0 && total_neutrons > 0) {
-            reactorPeriod = delta / log((double)total_neutrons / (double)oldNeutrons);
+            reactorPeriod = delta / log((long double)total_neutrons / (long double)oldNeutrons);
         } else {
             reactorPeriod = INFINITY; // avoid div by zero
         }
-        reactor_power = (float)total_neutrons / (float)maxNeutrons * 100.0f;
+        reactor_power = (long double)total_neutrons / (long double)maxNeutrons * 100.0f;
     }
 
     int moveRod(int x, int y, float rodPosition){
