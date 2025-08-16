@@ -1,6 +1,7 @@
 #pragma once
 #include "Channel.cpp"
 #include "PhysicsMath.cpp"
+#include <bits/stdc++.h>
 #include <iostream>
 
 class Reactor
@@ -15,13 +16,20 @@ public:
     static const int SIZE = 8;
     static const int HEIGHT = 10;
 
-    Channel* channels[SIZE][SIZE][HEIGHT];
-    int changeMetrix[SIZE][SIZE][HEIGHT];
+    const double VesselVolume = 90.0;         // m³, total vessel volume (water + steam)
+    const double Ru = 8.314;                  // J/(mol·K)
+    const double M = 0.018;                   // kg/mol
 
-    float waterAmmount = 60000.0f; //Liters
-    float steamAmmount = 0;
+    Channel* channels[SIZE][SIZE][HEIGHT] = {};
+    int changeMetrix[SIZE][SIZE][HEIGHT] = {};
 
-    float pressure = 1;
+    const int c_w = 4186;
+    const int L_v = 2260000;
+
+    double waterAmount = 60000.0f; //Liters
+    double steamAmount = 0;
+
+    float pressure = 101325; //Pa
 
     float waterTemperature = 20; //°C
 
@@ -46,7 +54,7 @@ public:
         //POPULATE THE REACTOR WITH CHANNELS
         const float center = (SIZE - 1) / 2.0f;
         const float radius = SIZE / 2.0f;
-        waterAmmount = water;
+        waterAmount = water;
 
         for (int x = 0; x < SIZE; x++) {
             for (int y = 0; y < SIZE; y++) {
@@ -74,6 +82,8 @@ public:
     }
 
     void update(float delta){
+        std::memset(changeMetrix, 0, sizeof(changeMetrix));
+
         oldNeutrons = total_neutrons;
         avarage_controlRodPosition = 0;
         total_neutrons = 0;
@@ -108,7 +118,24 @@ public:
         }
 
         //WATER BOILING
-        waterTemperature += ((long double)total_neutrons / (long double)maxNeutrons) * 3200000000.0f * delta / (4200.0f * waterAmmount);
+        waterTemperature += ((long double)total_neutrons / (long double)maxNeutrons) * 3200000000.0f * delta / (4200.0f * waterAmount);
+
+        float surplus = std::max((float)(waterTemperature - calculateBoilingPoint(pressure)),0.0f);
+        if(surplus > 0){
+            float ammountBoiled = surplus * waterAmount * c_w / L_v * delta;
+            waterAmount -= ammountBoiled;
+            steamAmount += ammountBoiled;
+
+            waterTemperature -= surplus;
+
+            double waterDensity = PhysicsMath::waterDensity(waterTemperature);
+            double waterVolume = waterAmount / 1000.0f;
+            double steamVolume = VesselVolume - waterVolume;
+            steamVolume = std::max(0.1, steamVolume);
+            double steamPressureCoefficient = (Ru / (M * steamVolume)) * 373.0;
+
+            pressure = steamAmount/1000.0f * steamPressureCoefficient * (waterTemperature + 273.0) / 373.0 + 101325.0f;
+        }
 
         avarage_iodine /= numberOfChannels;
         avarage_xenon /= numberOfChannels;

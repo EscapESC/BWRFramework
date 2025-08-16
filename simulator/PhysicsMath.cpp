@@ -22,6 +22,9 @@ double PhysicsMath::waterDensity(double temperature) {
 }
 
 double calculateBoilingPoint(double pressurePa) {
+
+    if (pressurePa <= 0.1) pressurePa = 0.1;
+    
     const double H_vap = 40650.0;   // Enthalpy of vaporization in J/mol
     const double R = 8.314;         // Gas constant in J/(mol·K)
     const double T1 = 373.15;       // Boiling point at 1 atm °Kelvin

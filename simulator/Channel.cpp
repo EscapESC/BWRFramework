@@ -9,8 +9,8 @@ public:
 
     float controlRodPosition = 100;
 
-    float iodine = 0;
-    float xenon = 0;
+    float iodine = 0.5f;
+    float xenon = 0.5f;
 
     long long int neutrons = 0;
     int idleNeutrons = 1000;
@@ -22,10 +22,11 @@ public:
 
     float power;
 
-    const float I_prod_factor     = 0.000073;   // I-135 production from fission
-    const float I_decay_factor    = 0.000105;   // I-135 decay constant
-    const float Xe_decay_factor   = 0.000021;   // Xe-135 radioactive decay
-    const float Xe_absorb_factor  = 0.000052;   // Xe-135 neutron absorption at full power
+    const float I_prod_factor     = 7.3e-5;    // iodine yield per fission 
+    const float I_decay_factor    = 2.93e-5;   // I-135 half-life ~6.6h
+    const float Xe_decay_factor   = 2.11e-5;   // Xe-135 half-life ~9.2h
+    const float Xe_absorb_factor  = 2.2e-4;    // tuned so xenon burns out fast enough at 100% power
+
 
     Channel(long long int maxN = 100000000000, int idleN = 1000){
         maxNeutrons = maxN;
@@ -49,7 +50,9 @@ public:
         iodine = std::max(0.0f, iodine);
         ////////////////////////////////
 
-        long double factor = 4.81f * ( 0.2f + (100.0f - controlRodPosition) * 0.8f / 100.0f ) * waterDensity / 1000.0f * ( 1 - xenon / 4.5 );
+        float voidCoefficient = 1 - 0.3 * neutrons / maxNeutrons;
+
+        long double factor = 4.81f * ( 0.2f + (100.0f - controlRodPosition) * 0.8f / 100.0f ) * waterDensity / 1000.0f * ( 1.0f - xenon / 40.0f ) * voidCoefficient;
 
         neutrons = factor * (idleNeutrons + oldNeutrons);
 
