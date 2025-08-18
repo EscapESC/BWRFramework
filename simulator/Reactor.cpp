@@ -16,7 +16,7 @@ public:
     static const int SIZE = 8;
     static const int HEIGHT = 10;
 
-    const double VesselVolume = 90.0;         // m³, total vessel volume (water + steam)
+    const double vesselVolume = 120.0;         // m³, total vessel volume (water + steam)
     const double Ru = 8.314;                  // J/(mol·K)
     const double M = 0.018;                   // kg/mol
 
@@ -26,7 +26,7 @@ public:
     const int c_w = 4186;
     const int L_v = 2260000;
 
-    double waterAmount = 60000.0f; //Liters
+    double waterAmount = 100000.0f; //Liters
     double steamAmount = 0;
 
     float pressure = 101325; //Pa
@@ -50,7 +50,7 @@ public:
 
     double reactor_power = 0;//output
 
-    Reactor(bool circle = true, long long int maxN = 100000000000, int idleN = 1000, int water = 60000){
+    Reactor(bool circle = true, long long int maxN = 100000000000, int idleN = 1000, int water = 100000){
         //POPULATE THE REACTOR WITH CHANNELS
         const float center = (SIZE - 1) / 2.0f;
         const float radius = SIZE / 2.0f;
@@ -118,7 +118,7 @@ public:
         }
 
         //WATER BOILING
-        waterTemperature += ((long double)total_neutrons / (long double)maxNeutrons) * 3200000000.0f * delta / (4200.0f * waterAmount);
+        waterTemperature += ((long double)total_neutrons / (long double)maxNeutrons) * (float)MAX_THERMAL_POWER * 1000000.0f * delta / (4200.0f * waterAmount);
 
         float surplus = std::max((float)(waterTemperature - calculateBoilingPoint(pressure)),0.0f);
         if(surplus > 0){
@@ -135,11 +135,11 @@ public:
 
             double waterDensity = PhysicsMath::waterDensity(waterTemperature);
             double waterVolume = waterAmount / 1000.0f;
-            double steamVolume = VesselVolume - waterVolume;
+            double steamVolume = vesselVolume - waterVolume;
             steamVolume = std::max(0.1, steamVolume);
             double steamPressureCoefficient = (Ru / (M * steamVolume)) * 373.0;
 
-            pressure = steamAmount/1000.0f * steamPressureCoefficient * (waterTemperature + 273.0) / 373.0 + 101325.0f;
+            pressure = steamAmount * steamPressureCoefficient * (waterTemperature + 273.0) / 373.0 + 101325.0f;
         }
 
         avarage_iodine /= numberOfChannels;
