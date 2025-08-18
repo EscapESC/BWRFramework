@@ -9,7 +9,7 @@ public:
 
     Reactor* reactor;
 
-    int maxTicks; //Yeah, turns out 1 is well enough.
+    int maxTicks; //Yeah, turns out 10 is well enough.
 
     std::chrono::_V2::system_clock::time_point lastTick;
     std::chrono::_V2::system_clock::duration overSleep;
@@ -28,7 +28,7 @@ public:
         return 0;
     }
 
-    Unit(int maxTicksPerSec = 1,bool circle = true, long long int maxN = 100000000000, int idleN = 1000){
+    Unit(int maxTicksPerSec = 10,bool circle = true, long long int maxN = 100000000000, int idleN = 1000){
         maxTicks = maxTicksPerSec;
         reactor = new Reactor(circle, maxN, idleN);
         lastTick = std::chrono::high_resolution_clock::now();

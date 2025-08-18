@@ -9,8 +9,8 @@ public:
 
     float controlRodPosition = 100;
 
-    float iodine = 0.5f;
-    float xenon = 0.5f;
+    float iodine = 0.0f;
+    float xenon = 0.0f;
 
     long long int neutrons = 0;
     int idleNeutrons = 1000;

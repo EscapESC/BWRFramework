@@ -7,7 +7,8 @@
 class Reactor
 {
 private:
-
+    float rp_deltacounter = 0;
+    long long int rp_oldneutrons = 0;
 public:
 
     static const int MAX_THERMAL_POWER = 3200; //MW
@@ -146,11 +147,19 @@ public:
         avarage_xenon /= numberOfChannels;
 
         avarage_controlRodPosition = avarage_controlRodPosition / numberOfChannels;
-        if (oldNeutrons > 0 && total_neutrons > 0) {
-            reactorPeriod = delta / log((long double)total_neutrons / (long double)oldNeutrons);
-        } else {
-            reactorPeriod = INFINITY; // avoid div by zero
+
+        //REACTOR PERIOD
+        rp_deltacounter += delta;
+        if(rp_deltacounter >= 1.0f){
+            if (rp_oldneutrons > 0 && total_neutrons > 0) {
+                reactorPeriod = rp_deltacounter / log((long double)total_neutrons / (long double)rp_oldneutrons);
+            } else {
+                reactorPeriod = INFINITY; // avoid div by zero
+            }
+            rp_oldneutrons = oldNeutrons;
+            rp_deltacounter -= 1.0f;
         }
+
         reactor_power = (long double)total_neutrons / (long double)maxNeutrons * 100.0f;
     }
 
