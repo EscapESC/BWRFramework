@@ -37,6 +37,7 @@ public:
     float avarage_controlRodPosition = 0;//output
 
     double reactorPeriod;//output
+    double reactorPeriod_precise;//output
 
     float avarage_iodine = 0;//output
     float avarage_xenon = 0;//output
@@ -97,7 +98,7 @@ public:
             for (int y = 0; y < SIZE; y++) {
                 for (int z = 0; z < HEIGHT; z++) {
                     if(channels[x][y][z] != nullptr){
-                        channels[x][y][z]->update(delta);
+                        channels[x][y][z]->update(delta, waterTemperature);
                         total_neutrons += channels[x][y][z]->neutrons;
                         avarage_controlRodPosition += channels[x][y][z]->controlRodPosition;
                         redistributeNeutrons(channels[x][y][z], x,y,z,channels,changeMetrix);
@@ -148,7 +149,7 @@ public:
 
         avarage_controlRodPosition = avarage_controlRodPosition / numberOfChannels;
 
-        //REACTOR PERIOD
+        //REACTOR PERIODs
         rp_deltacounter += delta;
         if(rp_deltacounter >= 1.0f){
             if (rp_oldneutrons > 0 && total_neutrons > 0) {
@@ -159,6 +160,11 @@ public:
             rp_oldneutrons = oldNeutrons;
             rp_deltacounter -= 1.0f;
         }
+        if (oldNeutrons> 0 && total_neutrons > 0) {
+                reactorPeriod_precise = delta / log((long double)total_neutrons / (long double)oldNeutrons);
+            } else {
+                reactorPeriod_precise = INFINITY; // avoid div by zero
+            }
 
         reactor_power = (long double)total_neutrons / (long double)maxNeutrons * 100.0f;
     }

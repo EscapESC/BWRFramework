@@ -12,13 +12,11 @@ public:
 
 double PhysicsMath::waterDensity(double temperature) {
     double T = temperature;
-    double density = 999.83952 
-                     + 16.945176 * T 
-                     - 7.9870401e-3 * pow(T, 2)
-                     - 46.170461e-6 * pow(T, 3)
-                     + 105.56302e-9 * pow(T, 4)
-                     - 280.54253e-12 * pow(T, 5);
-    return density; //kg/m³
+    double density = -0.000004467711 * pow(temperature, 3)
+                   - 0.000560288485 * pow(temperature, 2)
+                   - 0.429148844451 * temperature
+                   + 1010.035413387815;
+    return std::max(density, 720.0); //kg/m³
 }
 
 double calculateBoilingPoint(double pressurePa) {

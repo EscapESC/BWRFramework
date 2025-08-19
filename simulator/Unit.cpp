@@ -30,7 +30,12 @@ public:
 
     Unit(int maxTicksPerSec = 10,bool circle = true, long long int maxN = 100000000000, int idleN = 1000){
         maxTicks = maxTicksPerSec;
+        
+        //REACTOR
         reactor = new Reactor(circle, maxN, idleN);
+        //FEEDWATERPUMPS
+        
+
         lastTick = std::chrono::high_resolution_clock::now();
     }
 

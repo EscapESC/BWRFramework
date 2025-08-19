@@ -9,16 +9,14 @@ public:
 
     float controlRodPosition = 100;
 
-    float iodine = 0.0f;
-    float xenon = 0.0f;
+    float iodine = 0.0f; // use "(iodine/6)*100.0f" for display use with 50% being normal operation
+    float xenon = 0.0f; // use "(xenon/0.6)*100.0f" for display use with 50% being normal operation
 
     long long int neutrons = 0;
     int idleNeutrons = 1000;
     long long int maxNeutrons = 100000000000;
 
     long long int oldNeutrons = 0;
-
-    float waterDensity = 1000;
 
     float power;
 
@@ -33,7 +31,7 @@ public:
         idleNeutrons = idleN;
     }
 
-    void update(float delta){
+    void update(float delta, float waterTemp){
 
         //XENON/IODINE stuff
         iodine += (long double)neutrons/(long double)maxNeutrons * I_prod_factor * delta;
@@ -51,8 +49,9 @@ public:
         ////////////////////////////////
 
         float voidCoefficient = 1 - 0.3 * neutrons / maxNeutrons;
+        float waterDensity = PhysicsMath::waterDensity(waterTemp);
 
-        long double factor = 4.81f * ( 0.2f + (100.0f - controlRodPosition) * 0.8f / 100.0f ) * waterDensity / 1000.0f * ( 1.0f - xenon / 40.0f ) * voidCoefficient;
+        long double factor = 2.0f * ( 0.2f + (100.0f - controlRodPosition) * 0.8f / 100.0f ) * waterDensity / 1000.0f * expf(-0.067f * xenon) * voidCoefficient;
 
         neutrons = factor * (idleNeutrons + oldNeutrons);
 
