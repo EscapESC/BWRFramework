@@ -1,6 +1,7 @@
 #pragma once
 #include <chrono>
 #include "Reactor.cpp"
+#include "CoolantLoop.cpp"
 
 class Unit
 {
@@ -8,6 +9,7 @@ private:
 public:
 
     Reactor* reactor;
+    CoolantLoop* coolantLoop;
 
     int maxTicks; //Yeah, turns out 10 is well enough.
 
@@ -24,17 +26,18 @@ public:
         lastTick = now;
 
         reactor->update(deltaTime.count() / 1000000000.0f);
+        coolantLoop->update(deltaTime.count() / 1000000000.0f);
 
         return 0;
     }
 
-    Unit(int maxTicksPerSec = 10,bool circle = true, long long int maxN = 100000000000, int idleN = 1000){
+    Unit(int maxTicksPerSec = 60,bool circle = true, long long int maxN = 100000000000, int idleN = 1000){
         maxTicks = maxTicksPerSec;
         
         //REACTOR
         reactor = new Reactor(circle, maxN, idleN);
-        //FEEDWATERPUMPS
-        
+        //COOLANTLOOP
+        coolantLoop = new CoolantLoop(reactor);
 
         lastTick = std::chrono::high_resolution_clock::now();
     }
