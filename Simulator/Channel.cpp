@@ -51,7 +51,7 @@ public:
         float voidCoefficient = 1 - 0.3 * neutrons / maxNeutrons;
         float waterDensity = PhysicsMath::waterDensity(waterTemp);
 
-        long double factor = 2.0f * ( 0.2f + (100.0f - controlRodPosition) * 0.8f / 100.0f ) * waterDensity / 1000.0f * expf(-0.067f * xenon) * voidCoefficient;
+        long double factor = 1.6f * ( 0.2f + (100.0f - controlRodPosition) * 0.8f / 100.0f ) * waterDensity / 1000.0f * expf(-0.067f * xenon) * voidCoefficient;
 
         neutrons = factor * (idleNeutrons + oldNeutrons);
 

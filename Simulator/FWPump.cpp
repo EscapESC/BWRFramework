@@ -4,7 +4,7 @@ private:
 public:
     static const int MAX_RPM = 5500;
     static const int MAX_THRUGHPUT = 900; //kg/s
-    float RPM = 5500.0f/2; // SET TO 0
+    float RPM = 5500.0f; // SET TO 0
 
     float intakeValve = 100.0f; // SET TO 0
     float outtakeValve = 100.0f; // SET TO 0

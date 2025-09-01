@@ -11,7 +11,7 @@ public:
     Reactor* reactor;
     CoolantLoop* coolantLoop;
 
-    int maxTicks; //Yeah, turns out 10 is well enough.
+    int maxTicks; //Yeah, turns out 1000 is still less then 5% of CPU usage.
 
     std::chrono::_V2::system_clock::time_point lastTick;
     std::chrono::_V2::system_clock::duration overSleep;
@@ -31,7 +31,7 @@ public:
         return 0;
     }
 
-    Unit(int maxTicksPerSec = 60,bool circle = true, long long int maxN = 100000000000, int idleN = 1000){
+    Unit(int maxTicksPerSec = 1000,bool circle = true, long long int maxN = 100000000000, int idleN = 1000){
         maxTicks = maxTicksPerSec;
         
         //REACTOR
