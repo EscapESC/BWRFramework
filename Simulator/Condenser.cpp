@@ -8,7 +8,7 @@ private:
 public:
     static const int MAX_WATER_AMOUNT = 2000000; 
 
-    float waterAmount = 0; //L optimal 1000000
+    float waterAmount = 0; //Kg optimal 1000000
     float steamAmount = 0;
     float pressure = 101325;
 

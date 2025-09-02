@@ -23,6 +23,7 @@ public:
         reactor = reactorPointer;
         condenser = Condenser();
         turbine = Turbine();
+        turbine.init(reactorPointer->MAX_ELETRIC_POWER);
 
         for (int i = 0; i < numOfFWPumps; i++)
         { 
