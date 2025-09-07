@@ -41,11 +41,9 @@ public:
         float amount;
 
         //REACTOR -> TURBINE -> CONDENSER
-        amount = turbine.update(delta, reactor->pressure, condenser.pressure);
+        amount = turbine.update(delta, reactor->pressure, condenser.pressure, reactor->steamAmount);
         reactor->steamAmount -= amount;
         condenser.steamAmount += amount;
-        if(reactor->steamAmount < 0){condenser.steamAmount += reactor->steamAmount;reactor->steamAmount = 0;}
-        std::cout << "Condnser steam: "<< condenser.steamAmount << " "; //DELETE ME
 
         condenser.update(delta);
 

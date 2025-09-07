@@ -5,7 +5,7 @@ int main(int argc, char const *argv[])
 {
     Unit* unit = new Unit();
 
-    float rodPosition = 100;
+    float rodPosition = 60;
     
     for(int x = 0; x < 8; x++){
         for(int y = 0; y < 8; y++){

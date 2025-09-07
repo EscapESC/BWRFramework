@@ -1,0 +1,28 @@
+class RecirculationPump
+{
+private:
+
+public:
+
+    static const int MAX_RPM = 5500;
+    static const int MAX_THRUGHPUT = 900; //kg/s
+    float RPM = 0.0f; // SET TO 0
+
+    float intakeValve = 0.0f;
+    float outtakeValve = 0.0f;
+
+    bool pumpCavitation = false;
+
+    int numOfRcPump;
+
+    float update(double reactorPower){
+        if(reactorPower < 25 && RPM/MAX_RPM > 0.35){
+            pumpCavitation = true;
+        }
+
+        return RPM/MAX_RPM*intakeValve/100*outtakeValve/100;
+    }
+
+    RecirculationPump(int numOfRecirculattionPumps){numOfRcPump = numOfRecirculattionPumps;}
+    ~RecirculationPump(){}
+};

@@ -1,14 +1,15 @@
 #include <vector>
 #include "CondenserRCPump.cpp"
+#include "PhysicsMath.cpp"
 
 class Condenser
 {
 private:
     
 public:
-    static const int MAX_WATER_AMOUNT = 2000000; 
+    static const int CONDENSER_VOLUME = 7000; //m3 
 
-    float waterAmount = 0; //Kg optimal 1000000
+    float waterAmount = 0; //Kg optimal 1000000 
     float steamAmount = 0;
     float pressure = 101325;
 

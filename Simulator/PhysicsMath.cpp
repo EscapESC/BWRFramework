@@ -34,3 +34,18 @@ double calculateBoilingPoint(double pressurePa) {
 
     return T2 - 273.15;
 }
+
+double condensationTemperature(double pressurePa) {
+    // Antoine constants for water (valid roughly 1°C–100°C)
+    const double A = 8.07131;
+    const double B = 1730.63;
+    const double C = 233.426;
+
+    // Convert Pa to mmHg: 1 mmHg ≈ 133.322 Pa
+    double P_mmHg = pressurePa / 133.322;
+
+    // Inverse Antoine equation: T = B / (A - log10(P)) - C
+    double T = B / (A - log10(P_mmHg)) - C;
+
+    return T;
+}

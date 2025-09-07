@@ -31,7 +31,7 @@ public:
         idleNeutrons = idleN;
     }
 
-    void update(float delta, float waterTemp){
+    void update(float delta, float waterTemp, float recirculationPumpPW){
 
         //XENON/IODINE stuff
         iodine += (long double)neutrons/(long double)maxNeutrons * I_prod_factor * delta;
@@ -48,7 +48,7 @@ public:
         iodine = std::max(0.0f, iodine);
         ////////////////////////////////
 
-        float voidCoefficient = 1 - 0.3 * neutrons / maxNeutrons;
+        float voidCoefficient = (1 - 0.3 * neutrons / maxNeutrons) * (1-recirculationPumpPW);
         float waterDensity = PhysicsMath::waterDensity(waterTemp);
 
         long double factor = 1.6f * ( 0.2f + (100.0f - controlRodPosition) * 0.8f / 100.0f ) * waterDensity / 1000.0f * expf(-0.067f * xenon) * voidCoefficient;

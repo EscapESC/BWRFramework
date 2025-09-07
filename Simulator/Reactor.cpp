@@ -1,8 +1,10 @@
 #pragma once
 #include "Channel.cpp"
 #include "PhysicsMath.cpp"
+#include "RecirculationPump.cpp"
 #include <bits/stdc++.h>
 #include <iostream>
+#include <vector>
 
 class Reactor
 {
@@ -52,11 +54,19 @@ public:
 
     double reactor_power = 0;//output
 
-    Reactor(bool circle = true, long long int maxN = 100000000000, int idleN = 1000, int water = 100000){
+    std::vector<RecirculationPump> rcPumps;
+
+    Reactor(bool circle = true, long long int maxN = 100000000000, int idleN = 1000, int water = 100000, int numOfRcPumps = 2){
         //POPULATE THE REACTOR WITH CHANNELS
         const float center = (SIZE - 1) / 2.0f;
         const float radius = SIZE / 2.0f;
         waterAmount = water;
+
+        for (int i = 0; i < numOfRcPumps; i++)
+        {
+            rcPumps.emplace_back(numOfRcPumps);
+        }
+        
 
         for (int x = 0; x < SIZE; x++) {
             for (int y = 0; y < SIZE; y++) {
@@ -93,12 +103,18 @@ public:
         avarage_iodine = 0;
         avarage_xenon = 0;
 
+        float rcPumpPW = 0;
+        for (int i = 0; i < rcPumps.size(); i++)
+        {
+            rcPumpPW = rcPumps[i].update(reactor_power);
+        }
+
         //UPDATE CHANNELS
         for (int x = 0; x < SIZE; x++) {
             for (int y = 0; y < SIZE; y++) {
                 for (int z = 0; z < HEIGHT; z++) {
                     if(channels[x][y][z] != nullptr){
-                        channels[x][y][z]->update(delta, waterTemperature);
+                        channels[x][y][z]->update(delta, waterTemperature, rcPumpPW/rcPumps.size());
                         total_neutrons += channels[x][y][z]->neutrons;
                         avarage_controlRodPosition += channels[x][y][z]->controlRodPosition;
                         redistributeNeutrons(channels[x][y][z], x,y,z,channels,changeMetrix);
