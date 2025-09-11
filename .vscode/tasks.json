@@ -8,6 +8,13 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
+                "-I",
+                "include",
+                "-L",
+                "lib",
+                "-lraylib",
+                "-lgdi32",
+                "-lwinmm",
                 "-o",
                 "${fileDirname}\\build\\${fileBasenameNoExtension}.exe"
             ],

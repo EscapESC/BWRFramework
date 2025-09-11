@@ -24,10 +24,10 @@ public:
     const double M = 0.018;                   // kg/mol
 
     Channel* channels[SIZE][SIZE][HEIGHT] = {};
-    int changeMetrix[SIZE][SIZE][HEIGHT] = {};
+    long double changeMetrix[SIZE][SIZE][HEIGHT] = {};
 
-    const int c_w = 4186;
-    const int L_v = 2260000;
+    unsigned const int c_w = 4186;
+    unsigned const int L_v = 2260000;
 
     double waterAmount = 100000.0f; //Kg
     double steamAmount = 0;
@@ -48,15 +48,15 @@ public:
     int numberOfChannels = 0;
     int idleNeutrons = 0;
 
-    long long int maxNeutrons = 100000000000;
+    unsigned long long int maxNeutrons = 100000000000;
 
-    long long int oldNeutrons;
+    unsigned long long int oldNeutrons;
 
     double reactor_power = 0;//output
 
     std::vector<RecirculationPump> rcPumps;
 
-    Reactor(bool circle = true, long long int maxN = 100000000000, int idleN = 1000, int water = 100000, int numOfRcPumps = 2){
+    Reactor(bool circle = true, unsigned long long int maxN = 100000000000, unsigned int idleN = 1000, unsigned int water = 100000, unsigned int numOfRcPumps = 2){
         //POPULATE THE REACTOR WITH CHANNELS
         const float center = (SIZE - 1) / 2.0f;
         const float radius = SIZE / 2.0f;
@@ -118,7 +118,7 @@ public:
                         total_neutrons += channels[x][y][z]->neutrons;
                         avarage_controlRodPosition += channels[x][y][z]->controlRodPosition;
                         redistributeNeutrons(channels[x][y][z], x,y,z,channels,changeMetrix);
-
+                        
                         avarage_iodine += channels[x][y][z]->iodine;
                         avarage_xenon += channels[x][y][z]->xenon;
                     }
@@ -129,7 +129,7 @@ public:
             for (int y = 0; y < SIZE; y++) {
                 for (int z = 0; z < HEIGHT; z++) {
                     if(channels[x][y][z] != nullptr){
-                        channels[x][y][z]->neutrons += changeMetrix[x][y][z];
+                        channels[x][y][z]->oldNeutrons += changeMetrix[x][y][z];
                     }
                 }
             }
@@ -185,22 +185,24 @@ public:
         reactor_power = (long double)total_neutrons / (long double)maxNeutrons * 100.0f;
     }
 
-    int moveRod(int x, int y, float rodPosition){
+    int moveRod(unsigned int x,unsigned int y, float rodPosition){
 
+        rodPosition = std::clamp(rodPosition, 0.0f,100.0f);
+        
         if(channels[x][y][0] == nullptr){return -1;}
 
         float decrementedPosition = rodPosition;
 
         const float section = 100.0f/(float)HEIGHT;
 
-        for(int z = 0; z < HEIGHT; z++){
+        for(int z = HEIGHT-1; z >= 0; z--){
             if(decrementedPosition - section >= 0){
                 channels[x][y][z]->controlRodPosition = 100;
                 decrementedPosition -= section;
             }
             else{
                 channels[x][y][z]->controlRodPosition = decrementedPosition/section*100.0f;
-                for(int tz = z+1; tz < HEIGHT; tz++){
+                for(int tz = z-1; tz >= 0; tz--){
                     channels[x][y][tz]->controlRodPosition = 0;
                 }
                 return 0;
@@ -210,8 +212,23 @@ public:
 
     }
 
-    int redistributeNeutrons(Channel* channel, int x, int y, int z, Channel* channels[SIZE][SIZE][HEIGHT], int tempMatrix[SIZE][SIZE][HEIGHT]){
-        channel->neutrons /= 2;
+    float getRodPos(unsigned int x,unsigned int y){
+
+        float rodPosition = 0;
+
+        for(int z = 0; z < HEIGHT; z++){
+            if(channels[x][y][z]->controlRodPosition == 100){
+                rodPosition += std::abs(z-HEIGHT)*100;
+                return (float)rodPosition/(float)HEIGHT;
+            }
+            rodPosition += channels[x][y][z]->controlRodPosition;
+        }
+        return (float)rodPosition/(float)HEIGHT;
+    }
+
+    int redistributeNeutrons(Channel* channel, int x, int y, int z, Channel* channels[SIZE][SIZE][HEIGHT],long double tempMatrix[SIZE][SIZE][HEIGHT]){
+        channel->neutrons *= 0.75;
+        channel->oldNeutrons /= 4.0;
         
         for (int tx = -1; tx < 2; tx++)
         {
@@ -223,18 +240,18 @@ public:
                         int dist = std::abs(tx)+std::abs(ty)+std::abs(tz);
                         if(dist == 2){
                             if(channels[tx+x][ty+y][tz+z] != nullptr){
-                                tempMatrix[tx+x][ty+y][tz+z] += channel->neutrons/24;
+                                tempMatrix[tx+x][ty+y][tz+z] += channel->neutrons/24.0;
                             }
                             else{
-                                tempMatrix[x][y][z] += channel->neutrons/48;
+                                tempMatrix[x][y][z] += channel->neutrons/48.0;
                             }
                         }
                         else if(dist == 1){
                             if(channels[tx+x][ty+y][tz+z] != nullptr){
-                                tempMatrix[tx+x][ty+y][tz+z] += channel->neutrons/12;
+                                tempMatrix[tx+x][ty+y][tz+z] += channel->neutrons/12.0;
                             }
                             else{
-                                tempMatrix[x][y][z] += channel->neutrons/24;
+                                tempMatrix[x][y][z] += channel->neutrons/24.0;
                             }
                         }
                     }

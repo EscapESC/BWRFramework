@@ -1,12 +1,16 @@
+#pragma once
+
 class RecirculationPump
 {
 private:
 
 public:
 
+    bool power = false;
+
     static const int MAX_RPM = 5500;
     static const int MAX_THRUGHPUT = 900; //kg/s
-    float RPM = 0.0f; // SET TO 0
+    float RPM = 1100.0f; // SET TO 0
 
     float intakeValve = 0.0f;
     float outtakeValve = 0.0f;
@@ -19,6 +23,8 @@ public:
         if(reactorPower < 25 && RPM/MAX_RPM > 0.35){
             pumpCavitation = true;
         }
+
+        if(!power){RPM = 0;}
 
         return RPM/MAX_RPM*intakeValve/100*outtakeValve/100;
     }
