@@ -56,7 +56,7 @@ public:
 
         neutrons = factor * (idleNeutrons + oldNeutrons);
 
-        neutrons = (neutrons - oldNeutrons) * (long double)delta + oldNeutrons; //Delta time implementation
+        //neutrons = (neutrons - oldNeutrons) * (long double)delta + oldNeutrons; //Delta time implementation
 
         //Min-max checks
         if(neutrons < 0){neutrons = 0;}

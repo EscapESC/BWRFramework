@@ -1,6 +1,6 @@
 #pragma once
 
-class CondensatePumps
+class CondensatePump
 {
 private:
     /* data */
@@ -20,6 +20,6 @@ public:
         return waterAmount;
     }
 
-    CondensatePumps(/* args */){}
-    ~CondensatePumps(){}
+    CondensatePump(/* args */){}
+    ~CondensatePump(){}
 };

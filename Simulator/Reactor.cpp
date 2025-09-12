@@ -6,6 +6,8 @@
 #include <iostream>
 #include <vector>
 
+#include "config.hpp"
+
 class Reactor
 {
 private:
@@ -13,18 +15,12 @@ private:
     long long int rp_oldneutrons = 0;
 public:
 
-    static const int MAX_THERMAL_POWER = 3200; //MW
-    static const int MAX_ELETRIC_POWER = 1000; //MW
-
-    static const int SIZE = 8;
-    static const int HEIGHT = 10;
-
     const double vesselVolume = 120.0;         // m³, total vessel volume (water + steam)
     const double Ru = 8.314;                  // J/(mol·K)
     const double M = 0.018;                   // kg/mol
 
-    Channel* channels[SIZE][SIZE][HEIGHT] = {};
-    long double changeMetrix[SIZE][SIZE][HEIGHT] = {};
+    Channel* channels[REACTOR_CORE_SIZE][REACTOR_CORE_SIZE][REACTOR_CORE_HEIGHT] = {};
+    long double changeMetrix[REACTOR_CORE_SIZE][REACTOR_CORE_SIZE][REACTOR_CORE_HEIGHT] = {};
 
     unsigned const int c_w = 4186;
     unsigned const int L_v = 2260000;
@@ -44,9 +40,9 @@ public:
     float avarage_iodine = 0;//output
     float avarage_xenon = 0;//output
 
-    long long int total_neutrons = 0;
-    int numberOfChannels = 0;
-    int idleNeutrons = 0;
+    long double total_neutrons = 0;
+    unsigned int numberOfChannels = 0;
+    unsigned int idleNeutrons = 0;
 
     unsigned long long int maxNeutrons = 100000000000;
 
@@ -56,26 +52,26 @@ public:
 
     std::vector<RecirculationPump> rcPumps;
 
-    Reactor(bool circle = true, unsigned long long int maxN = 100000000000, unsigned int idleN = 1000, unsigned int water = 100000, unsigned int numOfRcPumps = 2){
+    Reactor(unsigned int water = 100000){
         //POPULATE THE REACTOR WITH CHANNELS
-        const float center = (SIZE - 1) / 2.0f;
-        const float radius = SIZE / 2.0f;
+        const float center = (REACTOR_CORE_SIZE - 1) / 2.0f;
+        const float radius = REACTOR_CORE_SIZE / 2.0f;
         waterAmount = water;
 
-        for (int i = 0; i < numOfRcPumps; i++)
+        for (int i = 0; i < NUM_OF_RC_PUMP; i++)
         {
-            rcPumps.emplace_back(numOfRcPumps);
+            rcPumps.emplace_back(NUM_OF_RC_PUMP);
         }
         
 
-        for (int x = 0; x < SIZE; x++) {
-            for (int y = 0; y < SIZE; y++) {
-                for (int z = 0; z < HEIGHT; z++) {
+        for (int x = 0; x < REACTOR_CORE_SIZE; x++) {
+            for (int y = 0; y < REACTOR_CORE_SIZE; y++) {
+                for (int z = 0; z < REACTOR_CORE_HEIGHT; z++) {
                     float dx = x - center;
                     float dy = y - center;
-                    if(circle){
+                    if(REACTOR_CORE_CIRCLE){
                         if (dx * dx + dy * dy <= radius * radius) {
-                            channels[x][y][z] = new Channel(maxN, idleN);
+                            channels[x][y][z] = new Channel(MAXIMUM_NEUTRON_COUNT, IDLE_NEUTRON_COUNT);
                             numberOfChannels++;
                         }
                         else {
@@ -83,14 +79,14 @@ public:
                         }
                     }
                     else{
-                        channels[x][y][z] = new Channel(maxN, idleN);
+                        channels[x][y][z] = new Channel(MAXIMUM_NEUTRON_COUNT, IDLE_NEUTRON_COUNT);
                         numberOfChannels++;
                     }
                 }
             }
         }
-        maxNeutrons = maxN * numberOfChannels;
-        idleNeutrons = idleN * numberOfChannels;
+        maxNeutrons = MAXIMUM_NEUTRON_COUNT * numberOfChannels;
+        idleNeutrons = IDLE_NEUTRON_COUNT * numberOfChannels;
     }
 
     void update(float delta){
@@ -110,9 +106,9 @@ public:
         }
 
         //UPDATE CHANNELS
-        for (int x = 0; x < SIZE; x++) {
-            for (int y = 0; y < SIZE; y++) {
-                for (int z = 0; z < HEIGHT; z++) {
+        for (int x = 0; x < REACTOR_CORE_SIZE; x++) {
+            for (int y = 0; y < REACTOR_CORE_SIZE; y++) {
+                for (int z = 0; z < REACTOR_CORE_HEIGHT; z++) {
                     if(channels[x][y][z] != nullptr){
                         channels[x][y][z]->update(delta, waterTemperature, rcPumpPW/rcPumps.size());
                         total_neutrons += channels[x][y][z]->neutrons;
@@ -125,9 +121,9 @@ public:
                 }
             }
         }
-        for (int x = 0; x < SIZE; x++) {
-            for (int y = 0; y < SIZE; y++) {
-                for (int z = 0; z < HEIGHT; z++) {
+        for (int x = 0; x < REACTOR_CORE_SIZE; x++) {
+            for (int y = 0; y < REACTOR_CORE_SIZE; y++) {
+                for (int z = 0; z < REACTOR_CORE_HEIGHT; z++) {
                     if(channels[x][y][z] != nullptr){
                         channels[x][y][z]->oldNeutrons += changeMetrix[x][y][z];
                     }
@@ -136,7 +132,7 @@ public:
         }
 
         //WATER BOILING
-        waterTemperature += ((long double)total_neutrons / (long double)maxNeutrons) * (float)MAX_THERMAL_POWER * 1000000.0f * delta / (4200.0f * waterAmount);
+        waterTemperature += ((long double)total_neutrons / (long double)maxNeutrons) * (float)REACTOR_MAX_THERMAL_POWER * 1000000.0f * delta / (4200.0f * waterAmount);
 
         float surplus = std::max((float)(waterTemperature - calculateBoilingPoint(pressure)),0.0f);
         if(surplus > 0.0f){
@@ -193,9 +189,9 @@ public:
 
         float decrementedPosition = rodPosition;
 
-        const float section = 100.0f/(float)HEIGHT;
+        const float section = 100.0f/(float)REACTOR_CORE_HEIGHT;
 
-        for(int z = HEIGHT-1; z >= 0; z--){
+        for(int z = REACTOR_CORE_HEIGHT-1; z >= 0; z--){
             if(decrementedPosition - section >= 0){
                 channels[x][y][z]->controlRodPosition = 100;
                 decrementedPosition -= section;
@@ -216,19 +212,19 @@ public:
 
         float rodPosition = 0;
 
-        for(int z = 0; z < HEIGHT; z++){
+        for(int z = 0; z < REACTOR_CORE_HEIGHT; z++){
             if(channels[x][y][z]->controlRodPosition == 100){
-                rodPosition += std::abs(z-HEIGHT)*100;
-                return (float)rodPosition/(float)HEIGHT;
+                rodPosition += std::abs(z-REACTOR_CORE_HEIGHT)*100;
+                return (float)rodPosition/(float)REACTOR_CORE_HEIGHT;
             }
             rodPosition += channels[x][y][z]->controlRodPosition;
         }
-        return (float)rodPosition/(float)HEIGHT;
+        return (float)rodPosition/(float)REACTOR_CORE_HEIGHT;
     }
 
-    int redistributeNeutrons(Channel* channel, int x, int y, int z, Channel* channels[SIZE][SIZE][HEIGHT],long double tempMatrix[SIZE][SIZE][HEIGHT]){
+    int redistributeNeutrons(Channel* channel, int x, int y, int z, Channel* channels[REACTOR_CORE_SIZE][REACTOR_CORE_SIZE][REACTOR_CORE_HEIGHT],long double tempMatrix[REACTOR_CORE_SIZE][REACTOR_CORE_SIZE][REACTOR_CORE_HEIGHT]){
         channel->neutrons *= 0.75;
-        channel->oldNeutrons /= 4.0;
+        channel->oldNeutrons *= 0.25;
         
         for (int tx = -1; tx < 2; tx++)
         {
@@ -236,7 +232,7 @@ public:
             {
                 for (int tz = -1; tz < 2; tz++)
                 {
-                    if(!(tx == 0 && ty == 0 && tz == 0) && !((tx+x < 0 || tx+x >= SIZE) || (ty+y < 0 || ty+y >= SIZE) || (tz+z < 0 || tz+z >= HEIGHT))){
+                    if(!(tx == 0 && ty == 0 && tz == 0) && !((tx+x < 0 || tx+x >= REACTOR_CORE_SIZE) || (ty+y < 0 || ty+y >= REACTOR_CORE_SIZE) || (tz+z < 0 || tz+z >= REACTOR_CORE_HEIGHT))){
                         int dist = std::abs(tx)+std::abs(ty)+std::abs(tz);
                         if(dist == 2){
                             if(channels[tx+x][ty+y][tz+z] != nullptr){
@@ -262,9 +258,9 @@ public:
     }
 
     ~Reactor() {
-    for (int x = 0; x < SIZE; x++) {
-        for (int y = 0; y < SIZE; y++) {
-            for (int z = 0; z < HEIGHT; z++) {
+    for (int x = 0; x < REACTOR_CORE_SIZE; x++) {
+        for (int y = 0; y < REACTOR_CORE_SIZE; y++) {
+            for (int z = 0; z < REACTOR_CORE_HEIGHT; z++) {
                 delete channels[x][y][z];
             }
         }

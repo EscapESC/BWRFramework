@@ -5,7 +5,9 @@
 #include "Condenser.cpp"
 #include "Turbine.cpp"
 #include "Deaerator.cpp"
-#include "CondensatePumps.cpp"
+#include "CondensatePump.cpp"
+
+#include "config.hpp"
 
 class CoolantLoop
 {
@@ -18,20 +20,20 @@ public:
     Deaerator deaerator;
 
     std::vector<FWPump> fwPumps;
-    std::vector<CondensatePumps> condPumps;
+    std::vector<CondensatePump> condPumps;
 
-    CoolantLoop(Reactor *reactorPointer,int numOfFWPumps = 2){
+    CoolantLoop(Reactor *reactorPointer){
         reactor = reactorPointer;
         condenser = Condenser();
         turbine = Turbine();
-        turbine.init(reactorPointer->MAX_ELETRIC_POWER);
+        turbine.init(REACTOR_MAX_ELETRIC_POWER);
 
-        for (int i = 0; i < numOfFWPumps; i++)
+        for (int i = 0; i < NUM_OF_FW_PUMP; i++)
         { 
             fwPumps.emplace_back();//cool new trick
         }
 
-        for (int i = 0; i < numOfFWPumps; i++)
+        for (int i = 0; i < NUM_OF_FW_PUMP; i++)
         { 
             condPumps.emplace_back();
         }

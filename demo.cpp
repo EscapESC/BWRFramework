@@ -2,6 +2,8 @@
 #include "Simulator/Unit.cpp"
 #include <chrono>
 
+#include "Simulator/config.hpp"
+
 #define RAYGUI_IMPLEMENTATION
 #include "include/raygui.h"
 
@@ -42,7 +44,7 @@ int main()
     std::cout << "INFO: RAYLIB sucessfully loaded\n";
     std::cout << "INFO: BWR4k sucessfully loaaded\b";
     
-    bool rodSelect[unit->reactor->SIZE][unit->reactor->SIZE];
+    bool rodSelect[REACTOR_CORE_SIZE][REACTOR_CORE_SIZE];
     std::memset(rodSelect,false, sizeof(rodSelect));
 
     int drawState = 1;
@@ -70,16 +72,16 @@ int main()
 
         auto tempColor = GuiGetStyle(DEFAULT, BASE_COLOR_NORMAL);
 
-        for(int x = 0; x < unit->reactor->SIZE; x++){
-            for(int y = 0; y < unit->reactor->SIZE; y++){
+        for(int x = 0; x < REACTOR_CORE_SIZE; x++){
+            for(int y = 0; y < REACTOR_CORE_SIZE; y++){
                 if(unit->reactor->channels[x][y][0]){
                     GuiSetStyle(DEFAULT, BASE_COLOR_NORMAL, heatColorIndicator(&unit->reactor->channels[x][y][Zindex]->power));
                     GuiToggle((Rectangle){(float)x*54,(float)y*54,54,54},TextFormat("%.2f%%\n%.2f%%",unit->reactor->getRodPos(x,y),unit->reactor->channels[x][y][Zindex]->power*100.0f),&rodSelect[x][y]);
                     if((sel == 0 || rodSelect[x][y]) && drawState == 0){
-                        unit->reactor->moveRod(x,y,unit->reactor->getRodPos(x,y)+(+0.1f+0.1f*(float)drawSpeed)*GetFrameTime());
+                        unit->reactor->moveRod(x,y,unit->reactor->getRodPos(x,y)+(+0.01f+0.1f*(float)drawSpeed)*GetFrameTime());
                     }
                     else if((sel == 0 || rodSelect[x][y]) && drawState == 2){
-                        unit->reactor->moveRod(x,y,unit->reactor->getRodPos(x,y)+(-0.1f-0.1f*(float)drawSpeed)*GetFrameTime());
+                        unit->reactor->moveRod(x,y,unit->reactor->getRodPos(x,y)+(-0.01f-0.1f*(float)drawSpeed)*GetFrameTime());
                     }
                 }
             }

@@ -3,6 +3,8 @@
 #include "Reactor.cpp"
 #include "CoolantLoop.cpp"
 
+#include "config.hpp"
+
 class Unit
 {
 private:
@@ -10,9 +12,6 @@ public:
 
     Reactor* reactor;
     CoolantLoop* coolantLoop;
-
-    static const int MAX_TPS_REACTOR = 1;
-    static const int MAX_TPS_COOLANT = 20; 
 
     std::chrono::_V2::system_clock::time_point reactor_lastTick;
     std::chrono::_V2::system_clock::time_point coolant_lastTick;
@@ -34,10 +33,10 @@ public:
         return 0;
     }
 
-    Unit(bool circle = true, long long int maxN = 100000000000, int idleN = 1000){
+    Unit(){
         
         //REACTOR
-        reactor = new Reactor(circle, maxN, idleN);
+        reactor = new Reactor();
         //COOLANTLOOP
         coolantLoop = new CoolantLoop(reactor);
 

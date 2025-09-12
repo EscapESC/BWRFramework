@@ -11,7 +11,7 @@ public:
     static const int SyncRPMReactorPower = 5; //5%
     static const int SyncRPM = 3600;
 
-    int MAX_ELETRIC_POWER = 1000;
+    int REACTOR_MAX_ELETRIC_POWER = 1000;
 
     static const int TurbineLag = 10;
 
@@ -26,7 +26,7 @@ public:
     double phase = 0;
 
     int init(const int maxEletricPower){
-        MAX_ELETRIC_POWER = maxEletricPower;
+        REACTOR_MAX_ELETRIC_POWER = maxEletricPower;
         return 0;
     }
 
@@ -50,7 +50,7 @@ public:
         } else{RPM = 3600; GeneratorOutput = 0;}
 
         if(synced){
-            GeneratorOutput = std::max(((turbineSteam/delta - TURBINE_MAX_FLOW * (SyncRPMReactorPower / 100.0f)) / (TURBINE_MAX_FLOW - TURBINE_MAX_FLOW * (SyncRPMReactorPower / 100.0f))) * MAX_ELETRIC_POWER, 0.0f);
+            GeneratorOutput = std::max(((turbineSteam/delta - TURBINE_MAX_FLOW * (SyncRPMReactorPower / 100.0f)) / (TURBINE_MAX_FLOW - TURBINE_MAX_FLOW * (SyncRPMReactorPower / 100.0f))) * REACTOR_MAX_ELETRIC_POWER, 0.0f);
         }
 
         float bypassSteam = bypassValve/100.0f * (float)BYPASS_MAX_FLOW * reactorPressure/7100000.0f * delta;
