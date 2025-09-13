@@ -54,7 +54,7 @@ public:
         {
             amount = car[i].update(delta);
             airAmount -= amount;
-            steamAmount -= amount/CAR_RATED_AIR_REMOVAL * 881944444;
+            steamAmount -= amount/CAR_RATED_AIR_REMOVAL * 80;
             if(steamAmount < 0){steamAmount = 0;}
             if(airAmount < 0){airAmount = 0;}
         }
