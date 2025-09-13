@@ -4,7 +4,7 @@ class FWPump
 {
 private:
 public:
-    bool power = false;
+    bool power = true;
 
     static const int MAX_RPM = 5500;
     static const int MAX_THRUGHPUT = 900; //kg/s

@@ -1,7 +1,7 @@
 #
 # rgl layout text file (v4.0) - raygui layout file generated using rGuiLayout
 #
-# Number of controls:     71
+# Number of controls:     78
 #
 # Ref. window:    r <x> <y> <width> <height>
 # Anchor info:    a <id> <name> <posx> <posy> <enabled>
@@ -79,3 +79,10 @@ c 067 14 ValueBOx068 1128 112 48 24 0 Flow:
 c 068 14 ValueBOx069 1128 160 48 24 0 Flow: 
 c 069 4 Label069 1176 112 24 24 0 kg/s
 c 070 4 Label070 1176 160 24 24 0 kg/s
+c 071 4 Wtemp 48 136 96 24 0 SAMPLE TEXT
+c 072 4 Pressure 48 160 96 24 0 SAMPLE TEXT
+c 073 4 Avgrod 48 544 120 24 0 Avg.rod:
+c 074 9 Mode 168 664 48 24 0 SDR;IPR;RUN
+c 075 9 RodMode 168 568 72 24 0 GROUP;ROD
+c 076 15 SRM 360 592 96 24 0 SRM
+c 077 15 IPR 360 616 96 24 0 IPR

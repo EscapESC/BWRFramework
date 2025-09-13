@@ -22,9 +22,9 @@ public:
     std::vector<FWPump> fwPumps;
     std::vector<CondensatePump> condPumps;
 
-    CoolantLoop(Reactor *reactorPointer){
+    CoolantLoop(Reactor *reactorPointer)
+        : condenser(reactorPointer){
         reactor = reactorPointer;
-        condenser = Condenser();
         turbine = Turbine();
         turbine.init(REACTOR_MAX_ELETRIC_POWER);
 
@@ -48,7 +48,7 @@ public:
         reactor->steamAmount -= amount;
         condenser.steamAmount += amount;
 
-        condenser.update(delta);
+        condenser.update(delta, amount);
 
         //CONDENSER -> DEAERATOR
         for (int i = 0; i < condPumps.size(); i++)

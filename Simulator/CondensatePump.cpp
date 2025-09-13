@@ -3,10 +3,13 @@
 class CondensatePump
 {
 private:
-    /* data */
+
 public:
+
+    bool power = true;
+
     static const int MAX_RPM = 5500;
-    static const int MAX_THRUGHPUT = 800; //kg/s
+    static const int MAX_THRUGHPUT = 900; //kg/s //WAS 800, forgot why
     float RPM = 5500.0f; // SET TO 0
 
     float intakeValve = 100.0f;
@@ -15,6 +18,7 @@ public:
     float update(float delta){
         float waterAmount = 0;
         if(RPM > 0){
+            if(!power){RPM = 0;}
             waterAmount = RPM/MAX_RPM * MAX_THRUGHPUT * intakeValve/100.0f * outtakeValve/100.0f * delta;
         }
         return waterAmount;

@@ -16,7 +16,7 @@ public:
     static const int TurbineLag = 10;
 
     float RPM = 0;
-    float turbineValve = 5.0f; // SET TO 0
+    float turbineValve = 100.0f; // SET TO 0
     float bypassValve = 0.0f;
 
     float GeneratorOutput;

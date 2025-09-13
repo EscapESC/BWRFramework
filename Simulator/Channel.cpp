@@ -8,7 +8,7 @@ private:
 
 public:
 
-    float controlRodPosition = 100;
+    float controlRodPosition = 0;
 
     float iodine = 0.0f; // use "(iodine/6)*100.0f" for display use with 50% being normal operation
     float xenon = 0.0f; // use "(xenon/0.6)*100.0f" for display use with 50% being normal operation
@@ -52,7 +52,7 @@ public:
         double voidCoefficient = (1 - 0.3 * neutrons / maxNeutrons) * (1-recirculationPumpPW);
         double waterDensity = PhysicsMath::waterDensity(waterTemp);
 
-        long double factor = 2.0 * ( 0.2 + (100.0 - controlRodPosition) * 0.8 / 100.0 ) * (((waterDensity / 1000.0 - 1.0) * 0.5) + 1.0) * expf(-0.067 * xenon) * voidCoefficient;
+        long double factor = 2.0 * ( 0.4 + controlRodPosition * 0.6 / 100.0 ) * (((waterDensity / 1000.0 - 1.0) * 0.5) + 1.0) * expf(-0.067 * xenon) * voidCoefficient;
 
         neutrons = factor * (idleNeutrons + oldNeutrons);
 

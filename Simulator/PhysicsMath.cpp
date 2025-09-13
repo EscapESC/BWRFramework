@@ -8,6 +8,7 @@ private:
 public:
     static double waterDensity(double temperature);
     static double calculateBoilingPoint(double pressurePa);
+    static double condensationTemperature(double pressurePa);
 };
 
 double PhysicsMath::waterDensity(double temperature) {
@@ -19,7 +20,7 @@ double PhysicsMath::waterDensity(double temperature) {
     return std::max(density, 720.0); //kg/m³
 }
 
-double calculateBoilingPoint(double pressurePa) {
+double PhysicsMath::calculateBoilingPoint(double pressurePa) {
 
     if (pressurePa <= 0.1) pressurePa = 0.1;
     
@@ -35,7 +36,7 @@ double calculateBoilingPoint(double pressurePa) {
     return T2 - 273.15;
 }
 
-double condensationTemperature(double pressurePa) {
+double PhysicsMath::condensationTemperature(double pressurePa) {
     // Antoine constants for water (valid roughly 1°C–100°C)
     const double A = 8.07131;
     const double B = 1730.63;

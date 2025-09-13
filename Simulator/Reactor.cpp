@@ -15,7 +15,6 @@ private:
     long long int rp_oldneutrons = 0;
 public:
 
-    const double vesselVolume = 120.0;         // m³, total vessel volume (water + steam)
     const double Ru = 8.314;                  // J/(mol·K)
     const double M = 0.018;                   // kg/mol
 
@@ -28,11 +27,11 @@ public:
     double waterAmount = 100000.0f; //Kg
     double steamAmount = 0;
 
-    float pressure = 101325; //Pa
+    long double pressure = 101325.0; //Pa
 
-    float waterTemperature = 20; //°C
+    long double waterTemperature = 20.0; //°C
 
-    float avarage_controlRodPosition = 0;//output
+    double avarage_controlRodPosition = 0;//output
 
     double reactorPeriod;//output
     double reactorPeriod_precise;//output
@@ -89,7 +88,7 @@ public:
         idleNeutrons = IDLE_NEUTRON_COUNT * numberOfChannels;
     }
 
-    void update(float delta){
+    void update(double delta){
         std::memset(changeMetrix, 0, sizeof(changeMetrix));
 
         oldNeutrons = total_neutrons;
@@ -130,13 +129,14 @@ public:
                 }
             }
         }
-
         //WATER BOILING
-        waterTemperature += ((long double)total_neutrons / (long double)maxNeutrons) * (float)REACTOR_MAX_THERMAL_POWER * 1000000.0f * delta / (4200.0f * waterAmount);
-
-        float surplus = std::max((float)(waterTemperature - calculateBoilingPoint(pressure)),0.0f);
+        if(!waterAmount == 0){
+            waterTemperature += ((long double)total_neutrons / (long double)maxNeutrons) * (double)REACTOR_MAX_THERMAL_POWER * 1000000.0 * delta / (4200.0 * waterAmount);
+        }
+        
+        double surplus = std::max((double)(waterTemperature - PhysicsMath::calculateBoilingPoint(pressure)),0.0);
         if(surplus > 0.0f){
-            float amountBoiled = surplus * waterAmount * c_w / L_v;
+            double amountBoiled = surplus * waterAmount * c_w / L_v;
             waterAmount -= amountBoiled;
             steamAmount += amountBoiled;
 
@@ -151,7 +151,7 @@ public:
 
         double waterDensity = PhysicsMath::waterDensity(waterTemperature);
         double waterVolume = waterAmount / 1000.0f;
-        double steamVolume = vesselVolume - waterVolume;
+        double steamVolume = REACTOR_VOLUME - waterVolume;
         steamVolume = std::max(0.1, steamVolume);
         double steamPressureCoefficient = (Ru / (M * steamVolume)) * 373.0;
         pressure = steamAmount * steamPressureCoefficient * (waterTemperature + 273.0) / 373.0 + 101325.0f;
@@ -181,45 +181,45 @@ public:
         reactor_power = (long double)total_neutrons / (long double)maxNeutrons * 100.0f;
     }
 
-    int moveRod(unsigned int x,unsigned int y, float rodPosition){
+    int moveRod(unsigned int x, unsigned int y, float rodPosition) {
 
-        rodPosition = std::clamp(rodPosition, 0.0f,100.0f);
-        
-        if(channels[x][y][0] == nullptr){return -1;}
+        rodPosition = std::clamp(rodPosition, 0.0f, 100.0f);
 
-        float decrementedPosition = rodPosition;
+        if (channels[x][y][0] == nullptr) { 
+            return -1; 
+        }
 
-        const float section = 100.0f/(float)REACTOR_CORE_HEIGHT;
+        float remainingPosition = rodPosition;
 
-        for(int z = REACTOR_CORE_HEIGHT-1; z >= 0; z--){
-            if(decrementedPosition - section >= 0){
+        const float section = 100.0f / static_cast<float>(REACTOR_CORE_HEIGHT);
+
+        for (int z = 0; z < REACTOR_CORE_HEIGHT; z++) {
+            if (remainingPosition - section >= 0) {
                 channels[x][y][z]->controlRodPosition = 100;
-                decrementedPosition -= section;
-            }
-            else{
-                channels[x][y][z]->controlRodPosition = decrementedPosition/section*100.0f;
-                for(int tz = z-1; tz >= 0; tz--){
+                remainingPosition -= section;
+            } 
+            else {
+                channels[x][y][z]->controlRodPosition = remainingPosition / section * 100.0f;
+                for (int tz = z + 1; tz < REACTOR_CORE_HEIGHT; tz++) {
                     channels[x][y][tz]->controlRodPosition = 0;
                 }
                 return 0;
             }
         }
-        return 0;
 
+        return 0;
     }
 
-    float getRodPos(unsigned int x,unsigned int y){
+    float getRodPos(unsigned int x, unsigned int y) {
 
-        float rodPosition = 0;
+        float rodPosition = 0.0f;
+        const float section = 100.0f / static_cast<float>(REACTOR_CORE_HEIGHT);
 
-        for(int z = 0; z < REACTOR_CORE_HEIGHT; z++){
-            if(channels[x][y][z]->controlRodPosition == 100){
-                rodPosition += std::abs(z-REACTOR_CORE_HEIGHT)*100;
-                return (float)rodPosition/(float)REACTOR_CORE_HEIGHT;
-            }
-            rodPosition += channels[x][y][z]->controlRodPosition;
+        for (int z = 0; z < REACTOR_CORE_HEIGHT; z++) {
+            rodPosition += channels[x][y][z]->controlRodPosition * (section / 100.0f);
         }
-        return (float)rodPosition/(float)REACTOR_CORE_HEIGHT;
+
+        return rodPosition;
     }
 
     int redistributeNeutrons(Channel* channel, int x, int y, int z, Channel* channels[REACTOR_CORE_SIZE][REACTOR_CORE_SIZE][REACTOR_CORE_HEIGHT],long double tempMatrix[REACTOR_CORE_SIZE][REACTOR_CORE_SIZE][REACTOR_CORE_HEIGHT]){

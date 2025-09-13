@@ -7,6 +7,8 @@
 #define RAYGUI_IMPLEMENTATION
 #include "include/raygui.h"
 
+constexpr int TILE_SIZE = 54;
+
 Unit* unit;
 
 static const float MAX_FPS = 60.0f;
@@ -17,12 +19,12 @@ uint32_t heatColorIndicator(double* powerLevel){
 
     *powerLevel = std::clamp(*powerLevel,0.0,1.0);
 
-    uint8_t R = (int8_t)(*powerLevel * 255.0f);
-    uint8_t G = 0.0f;
-    uint8_t B = (1.0f-*powerLevel) * 255.0f;
-    uint8_t A = 255.0f;
+    uint8_t R = (int8_t)(*powerLevel * 255.0);
+    uint8_t G = 0;
+    uint8_t B = (1.0-*powerLevel) * 255.0;
+    uint8_t A = 255;
 
-    if(*powerLevel > 1.0f){R = 255; B = 0;}
+    if(*powerLevel > 1.0){R = 255; B = 0;}
 
     return ((uint32_t)R << 24) | ((uint32_t)G << 16) | ((uint32_t)B << 8) | ((uint32_t)A);
 }
@@ -35,7 +37,7 @@ int main()
     SetConfigFlags(FLAG_WINDOW_ALWAYS_RUN | FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_MAXIMIZED);
     InitWindow(800, 600, "BWR4k");
     MaximizeWindow();
-    SetTargetFPS(60);
+    SetTargetFPS(60); // Must be greater (or 0) then the maximum TPS in the Simulator since raylib stops the main thread that also updates the simulation.
 
     bool showMessageBox = false;
 
@@ -51,24 +53,33 @@ int main()
     int drawSpeed = 0;
     int sel = 1;
     int Zindex = 0;
+    int modSel = 0;
+    int IPRsel = 0;
 
     lastTick = std::chrono::high_resolution_clock::now();
 
     while (!WindowShouldClose())
     {
 
+        unit->update();
+
         BeginDrawing();
         ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 
-        GuiToggleGroup((Rectangle){54*2-2,432+54,216/2,54},"Group;Rods", &sel);
-        GuiToggleGroup((Rectangle){54*2-2,432+54*2,216/3,54},"INS.;N;WIDTH.", &drawState);
-        GuiToggleGroup((Rectangle){54*2-2,432+54*3,216/3,54},"Slow;Med.;Fast", &drawSpeed);
+        GuiToggleGroup((Rectangle){TILE_SIZE*2-2,TILE_SIZE*9,TILE_SIZE*2,TILE_SIZE},"Group;Rods", &sel);
+        GuiToggleGroup((Rectangle){TILE_SIZE*2-2,TILE_SIZE*10,TILE_SIZE*4/3,TILE_SIZE},"INS.;N;WIDTH.", &drawState);
+        GuiToggleGroup((Rectangle){TILE_SIZE*2-2,TILE_SIZE*11,TILE_SIZE*4/3,TILE_SIZE},"Slow;Med.;Fast", &drawSpeed);
+        GuiToggleGroup((Rectangle){TILE_SIZE*2-2,TILE_SIZE*13,TILE_SIZE*4/3,TILE_SIZE},"SDR;IPR;RUN", &modSel);
 
-        GuiDrawText(TextFormat("Reactor period: %lf\nReactor period:%f",unit->reactor->reactorPeriod_precise,unit->reactor->reactorPeriod),(Rectangle){432-54*2,0,500,50},TEXT_ALIGN_LEFT, WHITE);
-        GuiDrawText(TextFormat("Reactor power: %lf",unit->reactor->reactor_power),(Rectangle){54*2,432,216,54},TEXT_ALIGN_CENTER,WHITE);
-        GuiSpinner((Rectangle){432,432,54*2,54},"SRM",&Zindex,0,9,false);
+        GuiDrawText(TextFormat("Reactor period: %lf\nReactor period:%f",unit->reactor->reactorPeriod_precise,unit->reactor->reactorPeriod),(Rectangle){TILE_SIZE*6,0,TILE_SIZE*8,TILE_SIZE},TEXT_ALIGN_LEFT, WHITE);
+        GuiDrawText(TextFormat("Reactor power: %lf",unit->reactor->reactor_power),(Rectangle){TILE_SIZE*2,TILE_SIZE*8,TILE_SIZE*4,TILE_SIZE},TEXT_ALIGN_CENTER,WHITE);
+        GuiSpinner((Rectangle){TILE_SIZE*7,TILE_SIZE*9,TILE_SIZE*2,TILE_SIZE},"SRM",&Zindex,0,9,false);
 
-        GuiDrawText(TextFormat("Avg. rod: %.2f%%",unit->reactor->avarage_controlRodPosition),(Rectangle){0,432,54*3,54},TEXT_ALIGN_LEFT, WHITE);
+        
+
+        GuiDrawText(TextFormat("Avg. rod: %.2f%%",unit->reactor->avarage_controlRodPosition),(Rectangle){0,TILE_SIZE*8,TILE_SIZE*3,TILE_SIZE},TEXT_ALIGN_LEFT, WHITE);
+
+        GuiSpinner((Rectangle){TILE_SIZE*7,TILE_SIZE*10,TILE_SIZE*2,TILE_SIZE},"IPR",&IPRsel,0,6,false);
 
         auto tempColor = GuiGetStyle(DEFAULT, BASE_COLOR_NORMAL);
 
@@ -78,10 +89,10 @@ int main()
                     GuiSetStyle(DEFAULT, BASE_COLOR_NORMAL, heatColorIndicator(&unit->reactor->channels[x][y][Zindex]->power));
                     GuiToggle((Rectangle){(float)x*54,(float)y*54,54,54},TextFormat("%.2f%%\n%.2f%%",unit->reactor->getRodPos(x,y),unit->reactor->channels[x][y][Zindex]->power*100.0f),&rodSelect[x][y]);
                     if((sel == 0 || rodSelect[x][y]) && drawState == 0){
-                        unit->reactor->moveRod(x,y,unit->reactor->getRodPos(x,y)+(+0.01f+0.1f*(float)drawSpeed)*GetFrameTime());
+                        unit->reactor->moveRod(x,y,unit->reactor->getRodPos(x,y)+(-0.01f-0.2f*(float)drawSpeed)*GetFrameTime());
                     }
                     else if((sel == 0 || rodSelect[x][y]) && drawState == 2){
-                        unit->reactor->moveRod(x,y,unit->reactor->getRodPos(x,y)+(-0.01f-0.1f*(float)drawSpeed)*GetFrameTime());
+                        unit->reactor->moveRod(x,y,unit->reactor->getRodPos(x,y)+(+0.01f+0.2f*(float)drawSpeed)*GetFrameTime());
                     }
                 }
             }
@@ -91,9 +102,7 @@ int main()
 
         if(GuiButton((Rectangle){432-54,432-54,54,54},"Clr.")){std::memset(rodSelect,0,sizeof(rodSelect));}
 
-        GuiDrawText(TextFormat("WTemp: %.2f°C\nPres.: %.0fPa",unit->reactor->waterTemperature,unit->reactor->pressure),(Rectangle){0,0,54*2,54},TEXT_ALIGN_LEFT,WHITE);
-
-        unit->update();
+        GuiDrawText(TextFormat("WTemp: %.2Lf°C\nPres.: %.0LfPa",unit->reactor->waterTemperature,unit->reactor->pressure),(Rectangle){0,0,54*2,54},TEXT_ALIGN_LEFT,WHITE);
 
         EndDrawing();
     }
