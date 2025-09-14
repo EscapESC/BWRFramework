@@ -17,7 +17,7 @@ Boiling Water Reactor simulator framework designed around BWR4 with the RBMK-100
 - [x] fwPumps
 - [ ] fwHeaters
 - [x] Turbine
-- [ ] Condenser
+- [x] Condenser
 - [ ] Deadorator
 
 ### Support system
